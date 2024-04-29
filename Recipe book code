@@ -1,12 +1,185 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Page Title</title>
-</head>
-<body>
+from tkinter import *
+from tkinter import ttk
+import sqlite3
 
-<h1>This is a Heading</h1>
-<p>This is a paragraph.</p>
+connection = sqlite3.connect('recipes.db')
+cursor = connection.cursor()
+cursor.execute('''CREATE TABLE IF NOT EXISTS recipes (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    ingredients TEXT NOT NULL,
+                    directions TEXT NOT NULL
+                )''')
+connection.commit()
 
-</body>
-</html>
+win = Tk()
+win.geometry("630x400+400+150")  # (Xsize*Ysize, Xspace+Yspace)
+win.title("Cooking Compass")
+win.configure(background="#f2f1a9")
+
+
+def openNewWindow():
+    newWindow = Toplevel(win)
+    newWindow.title("New Recipe")
+    newWindow.geometry("400x400")
+    newWindow.configure(background='#f2f1a9')
+
+    Label(newWindow,
+          text="NEW RECIPE", background="#f2f1a9", foreground="#3f2b09", font="impact"
+          ).pack()
+
+    lbl_name = ttk.Label(newWindow, text="Name:", background="#f2f1a9", foreground="#3f2b09", font="impact")
+    lbl_name.place(relx=0.25, rely=0.1,anchor=CENTER)  # EXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYT
+    ent_name = ttk.Entry(newWindow)
+    ent_name.pack(pady=5)
+
+
+    Label(newWindow, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+    ent_ingredients = Text(newWindow, width=30, height=5)
+    ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+    Label(newWindow, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+    ent_directions = Text(newWindow, width=30, height=5)
+    ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+    def add_recipe():
+        recipe_name = ent_name.get()
+        recipe_ingredients = ent_ingredients.get("1.0", END)
+        recipe_directions = ent_directions.get("1.0", END)
+        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
+                       (recipe_name, recipe_ingredients, recipe_directions))
+        connection.commit()
+        newWindow.destroy()
+        update_recipe_list()
+
+    btt_Conv = ttk.Button(newWindow, text="Add", command=add_recipe)
+    btt_Conv.pack(pady=5)
+
+
+def display_recipe(recipe_id, recipe_name, ingredients, directions):#REXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTY
+    def edit_recipe():
+        editWindow = Toplevel(win)
+        editWindow.title("Edit Recipe")
+        editWindow.geometry("400x400")
+        editWindow.configure(background='#f2f1a9')
+
+        Label(editWindow, text="Edit Recipe", background="#f2f1a9", foreground="#3f2b09", font="impact").pack()
+
+        lbl_name = ttk.Label(editWindow, text="Name:", background="#f2f1a9", foreground="#3f2b09", font="impact")
+        lbl_name.place(relx=0.25, rely=0.1, anchor=CENTER)#EXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYT
+        ent_name = ttk.Entry(editWindow)
+        ent_name.insert(END, recipe_name)
+        ent_name.pack(pady=5)
+
+        Label(editWindow, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+        ent_ingredients = Text(editWindow, width=30, height=5)
+        ent_ingredients.insert(END, ingredients)
+        ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+        Label(editWindow, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+        ent_directions = Text(editWindow, width=30, height=5)
+        ent_directions.insert(END, directions)
+        ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+
+
+
+        def save_changes():
+            new_recipe_name = ent_name.get()
+            new_ingredients = ent_ingredients.get("1.0", END)
+            new_directions = ent_directions.get("1.0", END)
+
+            cursor.execute("UPDATE recipes SET name=?, ingredients=?, directions=? WHERE id=?",
+                           (new_recipe_name, new_ingredients, new_directions, recipe_id))
+            connection.commit()
+            editWindow.destroy()
+            new_window.destroy()
+            update_recipe_list()
+
+        btt_Save = ttk.Button(editWindow, text="Save", command=save_changes)
+        btt_Save.pack(pady=5)
+
+    def delete_recipe():
+        cursor.execute("DELETE FROM recipes WHERE id=?", (recipe_id,))
+        connection.commit()
+        new_window.destroy()
+        update_recipe_list()
+
+    new_window = Toplevel(win)
+    new_window.title(recipe_name)
+    new_window.geometry("400x400")
+    new_window.configure(background="#f2f1a9")
+
+    Label(new_window, text=f"Name: {recipe_name}", background="#f2f1a9",foreground="#3f2b09", font="impact").pack()
+
+    Label(new_window, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+    ent_ingredients = Text(new_window, width=30, height=5)
+    ent_ingredients.insert(END, ingredients)
+    ent_ingredients.config(state='disabled')
+    ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+    Label(new_window, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+
+    ent_directions = Text(new_window, width=30, height=5)
+    ent_directions.insert(END, directions)
+    ent_directions.config(state='disabled')
+    ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
+
+    btt_Edit = ttk.Button(new_window, text="Edit", command=edit_recipe)
+    btt_Edit.pack(pady=5)
+
+    btt_Delete = ttk.Button(new_window, text="Delete", command=delete_recipe)
+    btt_Delete.pack(pady=5)
+
+def update_recipe_list():
+    cursor.execute("SELECT * FROM recipes")
+    recipes = cursor.fetchall()
+
+    for widget in frame.winfo_children():
+        widget.destroy()
+
+    row_count = 0
+    column_count = 0
+
+    for recipe in recipes:
+        recipe_id, recipe_name, _, _ = recipe
+
+        recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=30)
+        recipe_button.grid(row=row_count, column=column_count, padx=5, pady=5)
+
+        column_count += 1
+        if column_count == 3:
+            column_count = 0
+            row_count += 1
+
+    canvas.update_idletasks()
+
+
+canvas = Canvas(win, bg="#f2f1a9")
+canvas.pack(side=LEFT, fill=BOTH, expand=True)
+
+scrollbar = Scrollbar(win, orient=VERTICAL, command=canvas.yview)
+scrollbar.pack(side=RIGHT, fill=Y)
+
+canvas.configure(yscrollcommand=scrollbar.set)
+
+frame = Frame(canvas, bg="#f2f1a9")
+canvas.create_window((0, 50), window=frame, anchor="nw")
+
+canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+label = Label(win, text="Here are your recipes", foreground="#3f2b09", background="#f2f1a9",font="impact")
+label.place(x=200, y=10)
+
+bt1 = Button(win, text="+", height=2, width=4, bg="light gray",fg="#3f2b09", activebackground="blue", command=openNewWindow)
+bt1.place(x=0, y=0)
+
+update_recipe_list()
+win.resizable(0, 0)
+win.mainloop()
+connection.close()

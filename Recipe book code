@@ -2,6 +2,12 @@ from tkinter import *
 from tkinter import ttk
 import sqlite3
 
+newWindow = None
+editWindow = None
+menuWindow = None
+displayWindow = None
+b = "#f2f1a9"
+f = "#bf8040"
 connection = sqlite3.connect('recipes.db')
 cursor = connection.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS recipes (
@@ -13,39 +19,65 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS recipes (
 connection.commit()
 
 win = Tk()
-win.geometry("630x400+400+150")  # (Xsize*Ysize, Xspace+Yspace)
+win.geometry("630x400+400+150")
 win.title("Cooking Compass")
-win.configure(background="#f2f1a9")
+win.configure(background=b)
+
+def on_closing_new_window():
+    global newWindow
+    if newWindow is not None:
+        newWindow.destroy()
+        newWindow=None
+
+def on_closing_edit_window():
+    global editWindow
+    if editWindow is not None:
+        editWindow.destroy()
+        editWindow=None
+
+def on_closing_display_window():
+    global displayWindow
+    if displayWindow is not None:
+        displayWindow.destroy()
+        displayWindow=None
+
+def on_closing_menu_window():
+    global menuWindow
+    if menuWindow is not None:
+        menuWindow.destroy()
+        menuWindow=None
 
 
 def openNewWindow():
+    global newWindow
+    if newWindow is not None:
+        newWindow.focus()
+        return
     newWindow = Toplevel(win)
     newWindow.title("New Recipe")
     newWindow.geometry("400x400")
-    newWindow.configure(background='#f2f1a9')
+    newWindow.configure(background=b)
 
-    Label(newWindow,
-          text="NEW RECIPE", background="#f2f1a9", foreground="#3f2b09", font="impact"
-          ).pack()
+    Label(newWindow,text="NEW RECIPE", background=b, foreground=f, font="impact").pack()
 
-    lbl_name = ttk.Label(newWindow, text="Name:", background="#f2f1a9", foreground="#3f2b09", font="impact")
-    lbl_name.place(relx=0.25, rely=0.1,anchor=CENTER)  # EXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYT
-    ent_name = ttk.Entry(newWindow)
-    ent_name.pack(pady=5)
+    lbl_newName = ttk.Label(newWindow, text="Name:", background=b, foreground=f, font="impact")
+    lbl_newName.place(relx=0.25, rely=0.1,anchor=CENTER)
+    ent_newName = ttk.Entry(newWindow)
+    ent_newName.pack(pady=5)
 
-
-    Label(newWindow, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+    Label(newWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
     ent_ingredients = Text(newWindow, width=30, height=5)
     ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
-    Label(newWindow, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+    Label(newWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
     ent_directions = Text(newWindow, width=30, height=5)
     ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
+    newWindow.protocol("WM_DELETE_WINDOW", on_closing_new_window)
 
     def add_recipe():
-        recipe_name = ent_name.get()
+        recipe_name = ent_newName.get()
         recipe_ingredients = ent_ingredients.get("1.0", END)
         recipe_directions = ent_directions.get("1.0", END)
         cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
@@ -58,35 +90,38 @@ def openNewWindow():
     btt_Conv.pack(pady=5)
 
 
-def display_recipe(recipe_id, recipe_name, ingredients, directions):#REXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTYREXCGVBHUVCXRECTY
+def display_recipe(recipe_id, recipe_name, ingredients, directions):
+    global displayWindow
     def edit_recipe():
+        global editWindow
+        if editWindow is not None:
+            editWindow.focus()
+            return
         editWindow = Toplevel(win)
         editWindow.title("Edit Recipe")
         editWindow.geometry("400x400")
-        editWindow.configure(background='#f2f1a9')
+        editWindow.configure(background=b)
 
-        Label(editWindow, text="Edit Recipe", background="#f2f1a9", foreground="#3f2b09", font="impact").pack()
+        Label(editWindow, text="Edit Recipe", background=b, foreground=f, font="impact").pack()
 
-        lbl_name = ttk.Label(editWindow, text="Name:", background="#f2f1a9", foreground="#3f2b09", font="impact")
-        lbl_name.place(relx=0.25, rely=0.1, anchor=CENTER)#EXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYTEXRCGBHUIJNUBVYT
+        lbl_name = ttk.Label(editWindow, text="Name:", background=b, foreground=f, font="impact")
+        lbl_name.place(relx=0.25, rely=0.1, anchor=CENTER)
         ent_name = ttk.Entry(editWindow)
         ent_name.insert(END, recipe_name)
         ent_name.pack(pady=5)
 
-        Label(editWindow, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+        Label(editWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
         ent_ingredients = Text(editWindow, width=30, height=5)
         ent_ingredients.insert(END, ingredients)
         ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
-        Label(editWindow, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+        Label(editWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
         ent_directions = Text(editWindow, width=30, height=5)
         ent_directions.insert(END, directions)
         ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
-
-
-
+        editWindow.protocol("WM_DELETE_WINDOW", on_closing_edit_window)
 
         def save_changes():
             new_recipe_name = ent_name.get()
@@ -96,8 +131,8 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):#REXCGVBHUVC
             cursor.execute("UPDATE recipes SET name=?, ingredients=?, directions=? WHERE id=?",
                            (new_recipe_name, new_ingredients, new_directions, recipe_id))
             connection.commit()
-            editWindow.destroy()
-            new_window.destroy()
+            on_closing_display_window()
+            on_closing_edit_window()
             update_recipe_list()
 
         btt_Save = ttk.Button(editWindow, text="Save", command=save_changes)
@@ -106,45 +141,50 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):#REXCGVBHUVC
     def delete_recipe():
         cursor.execute("DELETE FROM recipes WHERE id=?", (recipe_id,))
         connection.commit()
-        new_window.destroy()
+        on_closing_display_window()
         update_recipe_list()
 
-    new_window = Toplevel(win)
-    new_window.title(recipe_name)
-    new_window.geometry("400x400")
-    new_window.configure(background="#f2f1a9")
+    if displayWindow is not None:
+        displayWindow.focus()
+        return
+    displayWindow = Toplevel(win)
+    displayWindow.title(recipe_name)
+    displayWindow.geometry("400x400")
+    displayWindow.configure(background=b)
 
-    Label(new_window, text=f"Name: {recipe_name}", background="#f2f1a9",foreground="#3f2b09", font="impact").pack()
+    Label(displayWindow, text=f"Name: {recipe_name}", background=b,foreground=f, font="impact").pack()
 
-    Label(new_window, text="Ingredients:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+    Label(displayWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
-    ent_ingredients = Text(new_window, width=30, height=5)
+    ent_ingredients = Text(displayWindow, width=30, height=5)
     ent_ingredients.insert(END, ingredients)
     ent_ingredients.config(state='disabled')
     ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
-    Label(new_window, text="Directions:", background="#f2f1a9", foreground="#3f2b09", font="bold").pack()
+    Label(displayWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
-    ent_directions = Text(new_window, width=30, height=5)
+    ent_directions = Text(displayWindow, width=30, height=5)
     ent_directions.insert(END, directions)
     ent_directions.config(state='disabled')
     ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
-    btt_Edit = ttk.Button(new_window, text="Edit", command=edit_recipe)
+    btt_Edit = ttk.Button(displayWindow, text="Edit", command=edit_recipe)
     btt_Edit.pack(pady=5)
 
-    btt_Delete = ttk.Button(new_window, text="Delete", command=delete_recipe)
+    btt_Delete = ttk.Button(displayWindow, text="Delete", command=delete_recipe)
     btt_Delete.pack(pady=5)
+    displayWindow.protocol("WM_DELETE_WINDOW", on_closing_display_window)
+
+
 
 def update_recipe_list():
     cursor.execute("SELECT * FROM recipes")
     recipes = cursor.fetchall()
+    row_count = 0
+    column_count = 0
 
     for widget in frame.winfo_children():
         widget.destroy()
-
-    row_count = 0
-    column_count = 0
 
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
@@ -159,8 +199,168 @@ def update_recipe_list():
 
     canvas.update_idletasks()
 
+def change():
+    global win, newWindow, editWindow, menuWindow, displayWindow
+    global labelColor
+    win.configure(background=b)
+    frame.configure(bg=b)
+    labelMain.configure(fg=f)
+    labelColor.configure(fg=f,bg=b)
+    bt1.configure(bg=b,fg=f)
+    bt2.configure(bg=b,fg=f)
 
-canvas = Canvas(win, bg="#f2f1a9")
+    for window in [win, newWindow, editWindow, menuWindow, displayWindow]:
+        if window:
+            window.configure(background=b)
+            for widget in window.winfo_children():
+                if 'background' in widget.keys():
+                    widget.configure(background=b)
+                if 'foreground' in widget.keys():
+                    widget.configure(foreground=f)
+                if isinstance(widget, Text):
+                    widget.configure(foreground="black")
+                    widget.configure(background="white")
+                if isinstance(widget, Entry):
+                    widget.configure(foreground="Black")
+
+
+def openMenuWindow():
+    global menuWindow
+    global labelColor
+    if menuWindow is not None:
+        menuWindow.focus()
+        return
+    menuWindow = Toplevel(win)
+    menuWindow.title("COLOR MENU")
+    menuWindow.geometry("400x400")
+    menuWindow.resizable(0, 0)
+    menuWindow.configure(background=b)
+
+    def pink():
+        global b, f
+        b = "#ffccdb"
+        f = "#24b9bc"
+        change()
+    def yellow():
+        global b, f
+        b = "#f2f1a9"
+        f = "#bf8040"
+        change()
+    def green():
+        global b, f
+        b = "#8EB288"
+        f = "#3a4a37"
+        change()
+    def brown():
+        global b, f
+        b = "#6f4e37"
+        f = "#f3e9dc"
+        change()
+    def orange():
+        global b, f
+        b = "#f4bb44"
+        f = "#f46344"
+        change()
+    def red():
+        global b, f
+        b = "#ff6666"
+        f = "#1c5c0e"
+        change()
+    def blue():
+        global b, f
+        b = "#003d99"
+        f = "#995c00"
+        change()
+    def purple():
+        global b, f
+        b = "#7b1157"
+        f = "#e2e046"
+        change()
+    def black():
+        global b, f
+        b = "#4d4a4b"
+        f = "#eceaea"
+        change()
+    def lime():
+        global b, f
+        b = "#009900"
+        f = "#ffff66"
+        change()
+    def lemon():
+        global b, f
+        b = "#ffff66"
+        f = "#009900"
+        change()
+    def honey():
+        global b, f
+        b = "#985b10"
+        f = "#e79a3f"
+        change()
+    def guava():
+        global b, f
+        b = "#b6c360"
+        f = "#ec6a4b"
+        change()
+    def tomato():
+        global b, f
+        b = "#ff6347"
+        f = "#6dc242"
+        change()
+    def coconut():
+        global b, f
+        b = "#965a3e"
+        f = "#fff2e6"
+        change()
+    def honeydew():
+        global b, f
+        b = "#ccffcc"
+        f = "#00cc00"
+        change()
+    def pizza():
+        global b, f
+        b = "#ffbf00"
+        f = "red"
+        change()
+    labelColor=Label(menuWindow, text="COLORWAYS", foreground=f, background=b, font="impact")
+    labelColor.grid(row=0,column=1,padx=20,pady=10)
+    btt_Cottoncandy=ttk.Button(menuWindow, text="COTTON CANDY", command=pink)
+    btt_Cottoncandy.grid(row=1,column=0,padx=20,pady=10)
+    btt_Banana=ttk.Button(menuWindow, text="BANANA", command=yellow)
+    btt_Banana.grid(row=1,column=1,padx=20,pady=10)
+    btt_Matcha=ttk.Button(menuWindow, text="MATCHA", command=green)
+    btt_Matcha.grid(row=1,column=2,padx=20,pady=10)
+    btt_Coffee=ttk.Button(menuWindow, text="COFFEE", command=brown)
+    btt_Coffee.grid(row=2,column=0,padx=20,pady=10)
+    btt_Mango=ttk.Button(menuWindow, text="MANGO", command=orange)
+    btt_Mango.grid(row=2,column=1,padx=20,pady=10)
+    btt_Watermelon=ttk.Button(menuWindow, text="WATERMELON", command=red)
+    btt_Watermelon.grid(row=2,column=2,padx=20,pady=10)
+    btt_Blueberry=ttk.Button(menuWindow, text="BLUEBERRY", command=blue)
+    btt_Blueberry.grid(row=3,column=0,padx=20,pady=10)
+    btt_Passionfruit=ttk.Button(menuWindow, text="PASSIONFRUIT", command=purple)
+    btt_Passionfruit.grid(row=3,column=1,padx=20,pady=10)
+    btt_Oreo=ttk.Button(menuWindow, text="OREO", command=black)
+    btt_Oreo.grid(row=3,column=2,padx=20,pady=10)
+    btt_Lime=ttk.Button(menuWindow, text="LIME", command=lime)
+    btt_Lime.grid(row=4,column=0,padx=20,pady=10)
+    btt_Lemon=ttk.Button(menuWindow, text="LEMON", command=lemon)
+    btt_Lemon.grid(row=4,column=1,padx=20,pady=10)
+    btt_Honey=ttk.Button(menuWindow, text="HONEY", command=honey)
+    btt_Honey.grid(row=4,column=2,padx=20,pady=10)
+    btt_Guava=ttk.Button(menuWindow, text="GUAVA", command=guava)
+    btt_Guava.grid(row=5,column=0,padx=20,pady=10)
+    btt_Tomato=ttk.Button(menuWindow, text="TOMATO", command=tomato)
+    btt_Tomato.grid(row=5,column=1,padx=20,pady=10)
+    btt_Coconut=ttk.Button(menuWindow, text="COCONUT", command=coconut)
+    btt_Coconut.grid(row=5,column=2,padx=20,pady=10)
+    btt_Honeydew=ttk.Button(menuWindow, text="HONEYDEW", command=honeydew)
+    btt_Honeydew.grid(row=6,column=0,padx=20,pady=10)
+    btt_Pizza=ttk.Button(menuWindow, text="PIZZA", command=pizza)
+    btt_Pizza.grid(row=6,column=1,padx=20,pady=10)
+    menuWindow.protocol("WM_DELETE_WINDOW", on_closing_menu_window)
+
+
+canvas = Canvas(win, bg=b)
 canvas.pack(side=LEFT, fill=BOTH, expand=True)
 
 scrollbar = Scrollbar(win, orient=VERTICAL, command=canvas.yview)
@@ -168,17 +368,19 @@ scrollbar.pack(side=RIGHT, fill=Y)
 
 canvas.configure(yscrollcommand=scrollbar.set)
 
-frame = Frame(canvas, bg="#f2f1a9")
+frame = Frame(canvas, bg=b)
 canvas.create_window((0, 50), window=frame, anchor="nw")
 
 canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
-label = Label(win, text="Here are your recipes", foreground="#3f2b09", background="#f2f1a9",font="impact")
-label.place(x=200, y=10)
+labelMain = Label(win, text="Here are your recipes", foreground=f, background=b,font=("impact",20),)
+labelMain.place(x=160, y=5)
 
-bt1 = Button(win, text="+", height=2, width=4, bg="light gray",fg="#3f2b09", activebackground="blue", command=openNewWindow)
-bt1.place(x=0, y=0)
+bt1 = Button(win, text="+", height=2, width=4, bg="light gray",fg=f, activebackground="blue", command=openNewWindow)
+bt1.place(x=0, y=1)
 
+bt2 = Button(win, text="MENU", height=2, width=4, bg="light gray",fg=f, activebackground="blue", command=openMenuWindow)
+bt2.place(x=40, y=1)
 update_recipe_list()
 win.resizable(0, 0)
 win.mainloop()

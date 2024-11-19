@@ -41,9 +41,9 @@ def on_closing_display_window():
         displayWindow.destroy()
         displayWindow=None
 
-# PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE
+# PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE
 current_page = 0
-recipes_per_page = 12
+recipes_per_page = 4#12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12
 
 def openNewWindow():
     global newWindow
@@ -185,9 +185,10 @@ def update_recipe_list():
 
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
-        recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=30)
-        recipe_button.grid(row=row_count, column=column_count, padx=5, pady=5)
-        column_count += 1
+        for x in range (3):
+            recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=30)
+            recipe_button.grid(row=row_count, column=column_count, padx=5, pady=5)
+            column_count += 1
         if column_count == 3:
             column_count = 0
             row_count += 1
@@ -201,14 +202,22 @@ def add_navigation_buttons():
         widget.destroy()
 
     if current_page > 0:
-        prev_button = ttk.Button(frame_navigation, text="Previous", command=previous_page)
-        prev_button.grid(row=0, column=0, padx=5, pady=5)
+        prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black",activebackground="blue", command=previous_page)
+        prev_button.place(x=50, y=300)
+    else:
+        prev_button.destroy()
+
 
     cursor.execute("SELECT COUNT(*) FROM recipes")
     total_recipes = cursor.fetchone()[0]
-    if (current_page + 1) * recipes_per_page < total_recipes:
-        next_button = ttk.Button(frame_navigation, text="Next", command=next_page)
-        next_button.grid(row=0, column=1, padx=5, pady=5)
+    total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
+    if current_page < total_pages - 1:
+        win.next_button = Button(win, text="Next", height=4, width=8, bg="light gray", fg="black",activebackground="blue", command=next_page)
+        win.next_button.place(x=550, y=300)
+        win.next_button["state"] = "normal"
+    else:
+        win.next_button["state"] = "disabled"
+
 
 def previous_page():
     global current_page
@@ -233,6 +242,7 @@ def print_database():
         print(f"Ingredients: {ingredients}")
         print(f"Directions: {directions}")
         print("-" * 40)
+
 
 
 frame = Frame(win, bg=b)

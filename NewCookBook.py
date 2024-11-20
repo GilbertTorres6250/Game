@@ -202,10 +202,13 @@ def add_navigation_buttons():
         widget.destroy()
 
     if current_page > 0:
-        prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black",activebackground="blue", command=previous_page)
-        prev_button.place(x=50, y=300)
-    else:
-        prev_button.destroy()
+      if not hasattr(win, 'prev_button'):
+          win.prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black", activebackground="blue", command=previous_page)
+          win.prev_button.place(x=30, y=300)
+    elif current_page==0:
+      if hasattr(win, 'prev_button'):
+          win.prev_button.destroy()
+          del win.prev_button
 
 
     cursor.execute("SELECT COUNT(*) FROM recipes")

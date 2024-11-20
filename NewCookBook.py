@@ -201,25 +201,25 @@ def add_navigation_buttons():
     for widget in frame_navigation.winfo_children():
         widget.destroy()
 
-    if current_page > 0:
-      if not hasattr(win, 'prev_button'):
-          win.prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black", activebackground="blue", command=previous_page)
-          win.prev_button.place(x=30, y=300)
+      if current_page > 0:
+        win.prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black", activebackground="blue", command=previous_page)
+        win.prev_button.place(x=30, y=300)
+        win.prev_button["state"]="normal"
     elif current_page==0:
-      if hasattr(win, 'prev_button'):
-          win.prev_button.destroy()
-          del win.prev_button
+        if hasattr(win, 'prev_button'):
+            win.prev_button["state"]="disabled"
 
 
     cursor.execute("SELECT COUNT(*) FROM recipes")
     total_recipes = cursor.fetchone()[0]
     total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
-    if current_page < total_pages - 1:
+    if current_page < total_pages-1:
         win.next_button = Button(win, text="Next", height=4, width=8, bg="light gray", fg="black",activebackground="blue", command=next_page)
         win.next_button.place(x=550, y=300)
         win.next_button["state"] = "normal"
     else:
-        win.next_button["state"] = "disabled"
+        if hasattr(win, 'next_button'):
+            win.next_button["state"] = "disabled"
 
 
 def previous_page():

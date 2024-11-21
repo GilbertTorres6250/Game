@@ -246,6 +246,18 @@ def print_database():
         print(f"Directions: {directions}")
         print("-" * 40)
 
+def drop_table():
+    confirmation = messagebox.askyesno(
+        title="Confirm Deletion",
+        message="Are you sure you want to delete the entire database? This action cannot be undone."
+    )
+    if confirmation:
+        try:
+            cursor.execute("DROP TABLE recipes")
+            messagebox.showinfo("Database Deleted", "The database has been deleted successfully.")
+            win.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error deleting the database: {e}")
 
 
 frame = Frame(win, bg=b)
@@ -263,7 +275,8 @@ bt1 = Button(win, text="+", height=2, width=4, bg="light gray", fg=b, activeback
 bt1.place(x=0, y=1)
 bt2 = Button(win, text="PRNT", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=print_database)
 bt2.place(x=40, y=1)
-
+bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=drop_database)
+bt3.place(x=80, y=1)
 
 win.resizable(0, 0)
 win.mainloop()

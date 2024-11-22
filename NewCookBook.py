@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 import sqlite3
+from tkinter import messagebox
+
 
 newWindow = None
 editWindow = None
@@ -19,8 +21,11 @@ connection.commit()
 
 win = Tk()
 win.geometry("630x400+400+150")
-win.title("Cooking Compass")
+win.title("COOKBOOK")
 win.configure(background=b)
+
+style = ttk.Style()
+style.configure("TButton", padding=(10, 10))
 
 
 def on_closing_new_window():
@@ -43,7 +48,7 @@ def on_closing_display_window():
 
 # PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE
 current_page = 0
-recipes_per_page = 4#12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12 12
+recipes_per_page = 12
 
 def openNewWindow():
     global newWindow
@@ -186,8 +191,8 @@ def update_recipe_list():
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
         for x in range (3):
-            recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=30)
-            recipe_button.grid(row=row_count, column=column_count, padx=5, pady=5)
+            recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=25, style="TButton")
+            recipe_button.grid(row=row_count, column=column_count, padx=10, pady=5)
             column_count += 1
         if column_count == 3:
             column_count = 0
@@ -233,7 +238,6 @@ def next_page():
     current_page += 1
     update_recipe_list()
 
-
 def print_database():
     cursor.execute("SELECT * FROM recipes")
     recipes = cursor.fetchall()
@@ -259,6 +263,12 @@ def drop_table():
         except Exception as e:
             messagebox.showerror("Error", f"Error deleting the database: {e}")
 
+def test():
+    for x in range(25):
+        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
+                       (x, x, x))
+        connection.commit()
+        update_recipe_list()
 
 frame = Frame(win, bg=b)
 frame.pack(pady=50)
@@ -277,6 +287,8 @@ bt2 = Button(win, text="PRNT", height=2, width=4, bg="light gray", fg=b, activeb
 bt2.place(x=40, y=1)
 bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=drop_database)
 bt3.place(x=80, y=1)
+bt4 = Button(win, text="ADD", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=test)
+bt4.place(x=120, y=1)
 
 win.resizable(0, 0)
 win.mainloop()

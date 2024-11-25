@@ -3,10 +3,10 @@ from tkinter import ttk
 import sqlite3
 from tkinter import messagebox
 
-
 newWindow = None
 editWindow = None
 displayWindow = None
+menuWindow = None
 b = "black"
 f = "white"
 connection = sqlite3.connect('recipes.db')
@@ -27,6 +27,20 @@ win.configure(background=b)
 style = ttk.Style()
 style.configure("TButton", padding=(10, 10))
 
+search_var = StringVar()
+
+def search_recipes():
+    global current_page
+    current_page = 0
+    search_query = search_var.get().lower()
+    if search_query:
+        cursor.execute("SELECT * FROM recipes WHERE name LIKE ?", ('%' + search_query + '%',))
+        recipes = cursor.fetchall()
+    else:
+        cursor.execute("SELECT * FROM recipes LIMIT ? OFFSET ?", (recipes_per_page, current_page * recipes_per_page))
+        recipes = cursor.fetchall()
+
+    update_recipe_list(recipes)
 
 def on_closing_new_window():
     global newWindow
@@ -88,8 +102,8 @@ def openNewWindow():
         on_closing_new_window()
         update_recipe_list()
 
-    btt_Conv = ttk.Button(newWindow, text="Add", command=add_recipe)
-    btt_Conv.pack(pady=5)
+    btt_Add = ttk.Button(newWindow, text="Add", command=add_recipe)
+    btt_Add.pack(pady=5)
 
 def display_recipe(recipe_id, recipe_name, ingredients, directions):
     global displayWindow
@@ -177,10 +191,9 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
     displayWindow.protocol("WM_DELETE_WINDOW", on_closing_display_window)
 
 def update_recipe_list():
-    global current_page
-
-    cursor.execute("SELECT * FROM recipes LIMIT ? OFFSET ?", (recipes_per_page, current_page * recipes_per_page))
-    recipes = cursor.fetchall()
+    if recipes is None:
+        cursor.execute("SELECT * FROM recipes LIMIT ? OFFSET ?", (recipes_per_page, current_page * recipes_per_page))
+        recipes = cursor.fetchall()
 
     for widget in frame.winfo_children():
         widget.destroy()
@@ -190,10 +203,9 @@ def update_recipe_list():
 
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
-        for x in range (3):
-            recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=25, style="TButton")
-            recipe_button.grid(row=row_count, column=column_count, padx=10, pady=5)
-            column_count += 1
+        recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=25, style="TButton")
+        recipe_button.grid(row=row_count, column=column_count, padx=10, pady=5)
+        column_count += 1
         if column_count == 3:
             column_count = 0
             row_count += 1
@@ -202,11 +214,15 @@ def update_recipe_list():
 
 def add_navigation_buttons():
     global current_page
+    global search_var
 
+    search_query = search_var.get().lower()
+
+  
     for widget in frame_navigation.winfo_children():
         widget.destroy()
 
-      if current_page > 0:
+    if current_page > 0:
         win.prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black", activebackground="blue", command=previous_page)
         win.prev_button.place(x=30, y=300)
         win.prev_button["state"]="normal"
@@ -225,6 +241,15 @@ def add_navigation_buttons():
     else:
         if hasattr(win, 'next_button'):
             win.next_button["state"] = "disabled"
+    if search_query:
+        try:
+            cursor.execute("SELECT COUNT(*) FROM recipes WHERE name LIKE ?", ('%' + search_query + '%',))
+            win.next_button["state"] = "disabled"
+            win.prev_button["state"] = "disabled"
+        except Exception as e:
+            print(e)
+    else:
+        cursor.execute("SELECT COUNT(*) FROM recipes")
 
 
 def previous_page():
@@ -253,15 +278,15 @@ def print_database():
 def drop_table():
     confirmation = messagebox.askyesno(
         title="Confirm Deletion",
-        message="Are you sure you want to delete the entire database? This action cannot be undone."
+        message="Are you sure you want to delete all your recipies? This action cannot be undone."
     )
     if confirmation:
         try:
             cursor.execute("DROP TABLE recipes")
-            messagebox.showinfo("Database Deleted", "The database has been deleted successfully.")
+            messagebox.showinfo("Recipies Deleted", "Recipies has been deleted successfully.")
             win.destroy()
         except Exception as e:
-            messagebox.showerror("Error", f"Error deleting the database: {e}")
+            messagebox.showerror("Error", f"Error deleting the recipies: {e}")
 
 def test():
     for x in range(25):
@@ -285,7 +310,7 @@ bt1 = Button(win, text="+", height=2, width=4, bg="light gray", fg=b, activeback
 bt1.place(x=0, y=1)
 bt2 = Button(win, text="PRNT", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=print_database)
 bt2.place(x=40, y=1)
-bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=drop_database)
+bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=drop_table)
 bt3.place(x=80, y=1)
 bt4 = Button(win, text="ADD", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=test)
 bt4.place(x=120, y=1)

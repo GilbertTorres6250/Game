@@ -190,7 +190,7 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
     btt_Delete.pack(pady=5)
     displayWindow.protocol("WM_DELETE_WINDOW", on_closing_display_window)
 
-def update_recipe_list():
+def update_recipe_list(recipes=None):
     if recipes is None:
         cursor.execute("SELECT * FROM recipes LIMIT ? OFFSET ?", (recipes_per_page, current_page * recipes_per_page))
         recipes = cursor.fetchall()

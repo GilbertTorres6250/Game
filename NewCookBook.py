@@ -303,8 +303,8 @@ frame_navigation.pack(pady=10)
 
 update_recipe_list()
 
-labelMain = Label(win, text="Here are your recipes", foreground=f, background=b, font=("impact", 20))
-labelMain.place(x=160, y=5)
+labelMain = Label(win, text="COOK BOOK", foreground=f, background=b, font=("impact", 20))
+labelMain.place(x=240, y=10)
 
 ent_Search = ttk.Entry(win, textvariable=search_var)
 ent_Search.place(x=450,y=20)

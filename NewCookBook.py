@@ -306,6 +306,10 @@ update_recipe_list()
 labelMain = Label(win, text="Here are your recipes", foreground=f, background=b, font=("impact", 20))
 labelMain.place(x=160, y=5)
 
+ent_Search = ttk.Entry(win, textvariable=search_var)
+ent_Search.place(x=450,y=20)
+ent_Search.bind("<KeyRelease>", lambda event: search_recipes())
+
 bt1 = Button(win, text="+", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=openNewWindow)
 bt1.place(x=0, y=1)
 bt2 = Button(win, text="PRNT", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=print_database)

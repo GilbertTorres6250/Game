@@ -24,9 +24,6 @@ win.geometry("630x400+400+150")
 win.title("COOKBOOK")
 win.configure(background=b)
 
-style = ttk.Style()
-style.configure("TButton", padding=(10, 10))
-
 search_var = StringVar()
 
 def search_recipes():
@@ -60,6 +57,11 @@ def on_closing_display_window():
         displayWindow.destroy()
         displayWindow=None
 
+def on_closing_menu_window():
+    global menuWindow
+    if menuWindow is not None:
+        menuWindow.destroy()
+        menuWindow=None
 # PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE PAGE
 current_page = 0
 recipes_per_page = 12
@@ -203,7 +205,7 @@ def update_recipe_list(recipes=None):
 
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
-        recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=25, style="TButton")
+        recipe_button = ttk.Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe), width=25, padding=(10,10))
         recipe_button.grid(row=row_count, column=column_count, padx=10, pady=5)
         column_count += 1
         if column_count == 3:
@@ -212,6 +214,72 @@ def update_recipe_list(recipes=None):
 
     add_navigation_buttons()
 
+def change():
+    for window in [win, newWindow, editWindow, displayWindow, menuWindow]:
+        if window:
+            window.configure(background=b)
+            for widget in window.winfo_children():
+                if 'background' in widget.keys():
+                    widget.configure(background=b)
+                if 'foreground' in widget.keys():
+                    widget.configure(foreground=f)
+                if isinstance(widget, Text):
+                    widget.configure(foreground="black")
+                    widget.configure(background="white")
+                if isinstance(widget, Entry):
+                    widget.configure(foreground="Black")
+
+def set_color(b_color, f_color):
+    global b, f
+    b = b_color
+    f = f_color
+    change()
+
+color_map = {
+    "COTTON CANDY": ("#ffccdb", "#24b9bc"),
+    "BANANA": ("#f2f1a9", "#bf8040"),
+    "MATCHA": ("#8EB288", "#3a4a37"),
+    "COFFEE": ("#6f4e37", "#f3e9dc"),
+    "MANGO": ("#f4bb44", "#f46344"),
+    "WATERMELON": ("#ff6666", "#1c5c0e"),
+    "BLUEBERRY": ("#003d99", "#995c00"),
+    "PASSIONFRUIT": ("#7b1157", "#e2e046"),
+    "OREO": ("#4d4a4b", "#eceaea"),
+    "LIME": ("#009900", "#ffff66"),
+    "LEMON": ("#ffff66", "#009900"),
+    "HONEY": ("#985b10", "#e79a3f"),
+    "GUAVA": ("#b6c360", "#ec6a4b"),
+    "TOMATO": ("#ff6347", "#6dc242"),
+    "COCONUT": ("#965a3e", "#fff2e6"),
+    "HONEYDEW": ("#ccffcc", "#00cc00"),
+    "PIZZA": ("#ffbf00", "red"),
+}
+
+def create_button(name, color_pair):
+    return ttk.Button(menuWindow, text=name, command=lambda: set_color(*color_pair))
+
+def openMenuWindow():
+    global menuWindow
+    global labelColor
+    if menuWindow is not None:
+        menuWindow.focus()
+        return
+    menuWindow = Toplevel(win)
+    menuWindow.title("COLOR MENU")
+    menuWindow.geometry("400x400")
+    menuWindow.resizable(0, 0)
+    menuWindow.configure(background=b)
+    menuWindow.protocol("WM_DELETE_WINDOW", on_closing_menu_window)
+
+    labelColor = Label(menuWindow, text="COLORWAYS", foreground=f, background=b, font="impact")
+    labelColor.grid(row=0, column=1, padx=20, pady=10)
+
+    for i, (name, color_pair) in enumerate(color_map.items()):
+        row = 1 + (i // 3)  # Start from row 1 (to leave row 0 for the title)
+        col = i % 3  # Place buttons in 3 columns
+        button = create_button(name, color_pair)
+        button.grid(row=row, column=col, padx=20, pady=10)
+      
 def add_navigation_buttons():
     global current_page
     global search_var
@@ -318,6 +386,8 @@ bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activeb
 bt3.place(x=80, y=1)
 bt4 = Button(win, text="ADD", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=test)
 bt4.place(x=120, y=1)
+btM = Button(win, text="MENU", height=2, width=4, bg="light gray",fg=b, activebackground="blue", command=openMenuWindow)
+btM.place(x=160, y=1)
 
 win.resizable(0, 0)
 win.mainloop()

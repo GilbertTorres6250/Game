@@ -18,6 +18,12 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS recipes (
                     directions TEXT NOT NULL
                 )''')
 connection.commit()
+cursor.execute('''CREATE TABLE IF NOT EXISTS colors (
+                    id INTEGER PRIMARY KEY,
+                    background_color TEXT,
+                    foreground_color TEXT
+                )''')
+connection.commit()
 
 win = Tk()
 win.geometry("630x400+400+150")
@@ -38,6 +44,19 @@ def search_recipes():
         recipes = cursor.fetchall()
 
     update_recipe_list(recipes)
+
+def saveColor(background, foreground):
+    cursor.execute("INSERT INTO colors (background_color, foreground_color) VALUES (?, ?)",
+                   (background, foreground))
+    connection.commit()
+
+def loadColor():
+    cursor.execute("SELECT * FROM colors ORDER BY id DESC LIMIT 1")
+    result = cursor.fetchone()
+    if result:
+        return result[1], result[2]  # Return the background and foreground colors
+    else:
+        return "black", "white"
 
 def on_closing_new_window():
     global newWindow
@@ -229,12 +248,6 @@ def change():
                 if isinstance(widget, Entry):
                     widget.configure(foreground="Black")
 
-def set_color(b_color, f_color):
-    global b, f
-    b = b_color
-    f = f_color
-    change()
-
 color_map = {
     "COTTON CANDY": ("#ffccdb", "#24b9bc"),
     "BANANA": ("#f2f1a9", "#bf8040"),
@@ -362,6 +375,17 @@ def test():
                        (x, x, x))
         connection.commit()
         update_recipe_list()
+      
+def setColor(b_color, f_color):
+    global b, f
+    b = b_color
+    f = f_color
+    saveColor(b, f)  # Save the color to the database
+    change()
+
+b, f = loadColor()
+win.configure(background=b)
+change()
 
 frame = Frame(win, bg=b)
 frame.pack(pady=50)
@@ -378,15 +402,15 @@ ent_Search = ttk.Entry(win, textvariable=search_var)
 ent_Search.place(x=450,y=20)
 ent_Search.bind("<KeyRelease>", lambda event: search_recipes())
 
-bt1 = Button(win, text="+", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=openNewWindow)
+bt1 = Button(win, text="+", height=2, width=4, bg=f, fg=b, activebackground="blue", command=openNewWindow)
 bt1.place(x=0, y=1)
-bt2 = Button(win, text="PRNT", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=print_database)
+bt2 = Button(win, text="PRNT", height=2, width=4, bg=f, fg=b, activebackground="blue", command=print_database)
 bt2.place(x=40, y=1)
-bt3 = Button(win, text="KILL", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=drop_table)
+bt3 = Button(win, text="KILL", height=2, width=4, bg=f, fg=b, activebackground="blue", command=drop_table)
 bt3.place(x=80, y=1)
-bt4 = Button(win, text="ADD", height=2, width=4, bg="light gray", fg=b, activebackground="blue", command=test)
+bt4 = Button(win, text="ADD", height=2, width=4, bg=f, fg=b, activebackground="blue", command=test)
 bt4.place(x=120, y=1)
-btM = Button(win, text="MENU", height=2, width=4, bg="light gray",fg=b, activebackground="blue", command=openMenuWindow)
+btM = Button(win, text="MENU", height=2, width=4, bg=f",fg=b, activebackground="blue", command=openMenuWindow)
 btM.place(x=160, y=1)
 
 win.resizable(0, 0)

@@ -54,7 +54,7 @@ def loadColor():
     cursor.execute("SELECT * FROM colors ORDER BY id DESC LIMIT 1")
     result = cursor.fetchone()
     if result:
-        return result[1], result[2]  # Return the background and foreground colors
+        return result[1], result[2]
     else:
         return "black", "white"
 
@@ -62,19 +62,19 @@ def on_closing_new_window():
     global newWindow
     if newWindow is not None:
         newWindow.destroy()
-        newWindow=None
+        newWindow = None
 
 def on_closing_edit_window():
     global editWindow
     if editWindow is not None:
         editWindow.destroy()
-        editWindow=None
+        editWindow = None
 
 def on_closing_display_window():
     global displayWindow
     if displayWindow is not None:
         displayWindow.destroy()
-        displayWindow=None
+        displayWindow = None
 
 def on_closing_menu_window():
     global menuWindow
@@ -95,10 +95,10 @@ def openNewWindow():
     newWindow.geometry("400x400")
     newWindow.configure(background=b)
 
-    Label(newWindow,text="NEW RECIPE", background=b, foreground=f, font="impact").pack()
+    Label(newWindow, text="NEW RECIPE", background=b, foreground=f, font="impact").pack()
 
     lbl_newName = ttk.Label(newWindow, text="Name:", background=b, foreground=f, font="impact")
-    lbl_newName.place(relx=0.25, rely=0.1,anchor=CENTER)
+    lbl_newName.place(relx=0.25, rely=0.1, anchor=CENTER)
     ent_newName = ttk.Entry(newWindow)
     ent_newName.pack(pady=5)
 
@@ -125,6 +125,7 @@ def openNewWindow():
 
     btt_Add = ttk.Button(newWindow, text="Add", command=add_recipe)
     btt_Add.pack(pady=5)
+
 
 def display_recipe(recipe_id, recipe_name, ingredients, directions):
     global displayWindow
@@ -188,7 +189,7 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
     displayWindow.geometry("400x400")
     displayWindow.configure(background=b)
 
-    Label(displayWindow, text=f"Name: {recipe_name}", background=b,foreground=f, font="impact").pack()
+    Label(displayWindow, text=f"Name: {recipe_name}", background=b, foreground=f, font="impact").pack()
 
     Label(displayWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
@@ -230,7 +231,6 @@ def update_recipe_list(recipes=None):
         if column_count == 3:
             column_count = 0
             row_count += 1
-
     add_navigation_buttons()
 
 def change():
@@ -245,8 +245,9 @@ def change():
                 if isinstance(widget, Text):
                     widget.configure(foreground="black")
                     widget.configure(background="white")
-                if isinstance(widget, Entry):
-                    widget.configure(foreground="Black")
+                if isinstance(widget, Button):###############################################
+                    widget.configure(background=f)
+                    widget.configure(foreground=b)
 
 color_map = {
     "COTTON CANDY": ("#ffccdb", "#24b9bc"),
@@ -269,7 +270,7 @@ color_map = {
 }
 
 def create_button(name, color_pair):
-    return ttk.Button(menuWindow, text=name, command=lambda: set_color(*color_pair))
+    return ttk.Button(menuWindow, text=name, command=lambda: setColor(*color_pair))
 
 def openMenuWindow():
     global menuWindow
@@ -292,31 +293,28 @@ def openMenuWindow():
         col = i % 3  # Place buttons in 3 columns
         button = create_button(name, color_pair)
         button.grid(row=row, column=col, padx=20, pady=10)
-      
+
 def add_navigation_buttons():
     global current_page
     global search_var
-
     search_query = search_var.get().lower()
 
-  
     for widget in frame_navigation.winfo_children():
         widget.destroy()
 
     if current_page > 0:
-        win.prev_button = Button(win, text="Prev", height=4, width=8, bg="light gray", fg="black", activebackground="blue", command=previous_page)
+        win.prev_button = Button(win, text="Prev", height=4, width=8, bg=f, fg=b,activebackground="blue", command=previous_page)
         win.prev_button.place(x=30, y=300)
-        win.prev_button["state"]="normal"
-    elif current_page==0:
+        win.prev_button["state"] = "normal"
+    elif current_page == 0:
         if hasattr(win, 'prev_button'):
-            win.prev_button["state"]="disabled"
-
+            win.prev_button["state"] = "disabled"
 
     cursor.execute("SELECT COUNT(*) FROM recipes")
     total_recipes = cursor.fetchone()[0]
     total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
-    if current_page < total_pages-1:
-        win.next_button = Button(win, text="Next", height=4, width=8, bg="light gray", fg="black",activebackground="blue", command=next_page)
+    if current_page < total_pages - 1:
+        win.next_button = Button(win, text="Next", height=4, width=8, bg=f, fg=b,activebackground="blue", command=next_page)
         win.next_button.place(x=550, y=300)
         win.next_button["state"] = "normal"
     else:
@@ -331,7 +329,6 @@ def add_navigation_buttons():
             print(e)
     else:
         cursor.execute("SELECT COUNT(*) FROM recipes")
-
 
 def previous_page():
     global current_page
@@ -375,17 +372,18 @@ def test():
                        (x, x, x))
         connection.commit()
         update_recipe_list()
-      
+
 def setColor(b_color, f_color):
     global b, f
     b = b_color
     f = f_color
-    saveColor(b, f)  # Save the color to the database
+    saveColor(b, f)
     change()
 
 b, f = loadColor()
 win.configure(background=b)
 change()
+
 
 frame = Frame(win, bg=b)
 frame.pack(pady=50)
@@ -410,9 +408,8 @@ bt3 = Button(win, text="KILL", height=2, width=4, bg=f, fg=b, activebackground="
 bt3.place(x=80, y=1)
 bt4 = Button(win, text="ADD", height=2, width=4, bg=f, fg=b, activebackground="blue", command=test)
 bt4.place(x=120, y=1)
-btM = Button(win, text="MENU", height=2, width=4, bg=f",fg=b, activebackground="blue", command=openMenuWindow)
+btM = Button(win, text="MENU", height=2, width=4, bg=f,fg=b, activebackground="blue", command=openMenuWindow)
 btM.place(x=160, y=1)
-
 win.resizable(0, 0)
 win.mainloop()
 

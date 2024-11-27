@@ -115,8 +115,8 @@ def openNewWindow():
 
     def add_recipe():
         recipe_name = ent_newName.get()
-        recipe_ingredients = ent_ingredients.get("1.0", END)
-        recipe_directions = ent_directions.get("1.0", END)
+        recipe_ingredients = ent_ingredients.get("1.0", END).strip()
+        recipe_directions = ent_directions.get("1.0", END).strip()
         cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
                        (recipe_name, recipe_ingredients, recipe_directions))
         connection.commit()
@@ -162,8 +162,8 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
 
         def save_changes():
             new_recipe_name = ent_name.get()
-            new_ingredients = ent_ingredients.get("1.0", END)
-            new_directions = ent_directions.get("1.0", END)
+            new_ingredients = ent_ingredients.get("1.0", END).strip()
+            new_directions = ent_directions.get("1.0", END).strip()
 
             cursor.execute("UPDATE recipes SET name=?, ingredients=?, directions=? WHERE id=?",
                            (new_recipe_name, new_ingredients, new_directions, recipe_id))

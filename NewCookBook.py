@@ -42,7 +42,6 @@ def search_recipes():
     else:
         cursor.execute("SELECT * FROM recipes LIMIT ? OFFSET ?", (recipes_per_page, current_page * recipes_per_page))
         recipes = cursor.fetchall()
-
     update_recipe_list(recipes)
 
 def saveColor(background, foreground):
@@ -72,6 +71,10 @@ def on_closing_edit_window():
 
 def on_closing_display_window():
     global displayWindow
+    global editWindow
+    if editWindow is not None:
+        editWindow.destroy()
+        editWindow = None
     if displayWindow is not None:
         displayWindow.destroy()
         displayWindow = None
@@ -248,25 +251,34 @@ def change():
                 if isinstance(widget, Button):###############################################
                     widget.configure(background=f)
                     widget.configure(foreground=b)
+                if isinstance(widget, Entry):###############################################
+                    widget.configure(foreground=b)
 
 color_map = {
-    "COTTON CANDY": ("#ffccdb", "#24b9bc"),
-    "BANANA": ("#f2f1a9", "#bf8040"),
-    "MATCHA": ("#8EB288", "#3a4a37"),
-    "COFFEE": ("#6f4e37", "#f3e9dc"),
-    "MANGO": ("#f4bb44", "#f46344"),
-    "WATERMELON": ("#ff6666", "#1c5c0e"),
-    "BLUEBERRY": ("#003d99", "#995c00"),
-    "PASSIONFRUIT": ("#7b1157", "#e2e046"),
-    "OREO": ("#4d4a4b", "#eceaea"),
-    "LIME": ("#009900", "#ffff66"),
-    "LEMON": ("#ffff66", "#009900"),
-    "HONEY": ("#985b10", "#e79a3f"),
-    "GUAVA": ("#b6c360", "#ec6a4b"),
-    "TOMATO": ("#ff6347", "#6dc242"),
-    "COCONUT": ("#965a3e", "#fff2e6"),
-    "HONEYDEW": ("#ccffcc", "#00cc00"),
-    "PIZZA": ("#ffbf00", "red"),
+    "COFFEE": ("#4d3626", "#f3e9dc"),#Dark brown
+    "HORCHATA": ("#f2e9d9", "#b8976a"),#Tan
+    "DR PEPPER": ("#711f25", "white"),#Red
+    "MATCHA": ("#8EB288", "#3a4a37"),#Pastel green
+    "CREAMSICLE": ("#fbbd60", "#f7e0b6"),#Orange
+    "TARO": ("#9C7F91", "#E3B8C3"),#Pastel Purple
+    "BLUE CHEESE": ("#6a7f8c", "#d1d9e6"),#Pastel Blue
+    "OREO": ("#4d4a4b", "#eceaea"),#Grey
+    "WATERMELON": ("#1c5c0e", "#ff6666"),#Dark green
+    "HONEYDEW": ("#E0E094","#8AB532"),#Tan green
+    "COTTON CANDY": ("#ffccdb", "#24b9bc"),#Pink
+    "BANANA": ("#f2f1a9", "#bf8040"),#Yellow
+    "BLUEBERRY": ("#003d99", "#995c00"),#Blue
+    "PASSIONFRUIT": ("#7b1157", "#e2e046"),#Purple
+    "COCONUT": ("#965a3e", "#fff2e6"),#Brown
+    "MANGO": ("#f4bb44", "#f46344"),#Orange
+    "LIME": ("#009900", "#ffff66"),#Lime
+    "LEMON": ("#ffff66", "#009900"),#Yellow
+    "PUMPKIN PIE": ("#D97A3B", "#F0A03A"),#Orange
+    "GRAPE": ("#6f2da8", "#E3B8C3"),#Purple
+    "GUAVA": ("#b6c360", "#ec6a4b"),#Yucky Green
+    "TOMATO": ("#ff6347", "#6dc242"),#Red
+    "HONEY": ("#f9c901", "#985b10"),#Yellow
+    "STRAWBERRY MILK": ("#fc5c8c", "#fbd8d8"),#Pink
 }
 
 def create_button(name, color_pair):
@@ -303,7 +315,7 @@ def add_navigation_buttons():
         widget.destroy()
 
     if current_page > 0:
-        win.prev_button = Button(win, text="Prev", height=4, width=8, bg=f, fg=b,activebackground="blue", command=previous_page)
+        win.prev_button = Button(win, text="Prev", height=4, width=8, bg=f, fg=b,activebackground="blue", command=previous_page,font = "bold")
         win.prev_button.place(x=30, y=300)
         win.prev_button["state"] = "normal"
     elif current_page == 0:
@@ -330,16 +342,18 @@ def add_navigation_buttons():
     else:
         cursor.execute("SELECT COUNT(*) FROM recipes")
 
-def previous_page():
+def previous_page(event=None):
     global current_page
-    if current_page > 0:
-        current_page -= 1
-        update_recipe_list()
+    if not search_var.get():
+        if current_page > 0:
+            current_page -= 1
+            update_recipe_list()
 
-def next_page():
+def next_page(event=None):
     global current_page
-    current_page += 1
-    update_recipe_list()
+    if not search_var.get():
+        current_page += 1
+        update_recipe_list()
 
 def print_database():
     cursor.execute("SELECT * FROM recipes")
@@ -380,10 +394,9 @@ def setColor(b_color, f_color):
     saveColor(b, f)
     change()
 
-b, f = loadColor()
+b,f = loadColor()
 win.configure(background=b)
 change()
-
 
 frame = Frame(win, bg=b)
 frame.pack(pady=50)
@@ -396,8 +409,8 @@ update_recipe_list()
 labelMain = Label(win, text="COOK BOOK", foreground=f, background=b, font=("impact", 20))
 labelMain.place(x=240, y=10)
 
-ent_Search = ttk.Entry(win, textvariable=search_var)
-ent_Search.place(x=450,y=20)
+ent_Search = ttk.Entry(win, textvariable=search_var,font= "bold", foreground=b,)
+ent_Search.place(x=400,y=15)
 ent_Search.bind("<KeyRelease>", lambda event: search_recipes())
 
 bt1 = Button(win, text="+", height=2, width=4, bg=f, fg=b, activebackground="blue", command=openNewWindow)
@@ -410,7 +423,11 @@ bt4 = Button(win, text="ADD", height=2, width=4, bg=f, fg=b, activebackground="b
 bt4.place(x=120, y=1)
 btM = Button(win, text="MENU", height=2, width=4, bg=f,fg=b, activebackground="blue", command=openMenuWindow)
 btM.place(x=160, y=1)
+win.bind("<Right>", next_page)
+win.bind("<Left>", previous_page)
+win.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 win.resizable(0, 0)
 win.mainloop()
+
 
 connection.close()

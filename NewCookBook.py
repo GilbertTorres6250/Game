@@ -40,8 +40,7 @@ def search_recipes():
     current_page = 0
     search_query = search_var.get().lower()
     if search_query:
-        cursor.execute("SELECT * FROM recipes WHERE name LIKE ? LIMIT ? OFFSET ?",
-                       ('%' + search_query + '%', recipes_per_page, current_page * recipes_per_page))
+        cursor.execute("SELECT * FROM recipes WHERE name LIKE ? LIMIT ? OFFSET ?",('%' + search_query + '%', recipes_per_page, current_page * recipes_per_page))
         recipes = cursor.fetchall()
 
     else:
@@ -51,8 +50,7 @@ def search_recipes():
 
 
 def saveColor(background, foreground):
-    cursor.execute("INSERT INTO colors (background_color, foreground_color) VALUES (?, ?)",
-                   (background, foreground))
+    cursor.execute("INSERT INTO colors (background_color, foreground_color) VALUES (?, ?)",(background, foreground))
     connection.commit()
 
 
@@ -134,8 +132,7 @@ def openNewWindow():
         recipe_name = ent_newName.get()
         recipe_ingredients = ent_ingredients.get("1.0", END).strip()
         recipe_directions = ent_directions.get("1.0", END).strip()
-        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
-                       (recipe_name, recipe_ingredients, recipe_directions))
+        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",(recipe_name, recipe_ingredients, recipe_directions))
         connection.commit()
         on_closing_new_window()
         update_recipe_list()
@@ -185,8 +182,7 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
             new_ingredients = ent_ingredients.get("1.0", END).strip()
             new_directions = ent_directions.get("1.0", END).strip()
 
-            cursor.execute("UPDATE recipes SET name=?, ingredients=?, directions=? WHERE id=?",
-                           (new_recipe_name, new_ingredients, new_directions, recipe_id))
+            cursor.execute("UPDATE recipes SET name=?, ingredients=?, directions=? WHERE id=?",(new_recipe_name, new_ingredients, new_directions, recipe_id))
             connection.commit()
             on_closing_display_window()
             on_closing_edit_window()
@@ -231,8 +227,7 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
     btt_Delete = ttk.Button(displayWindow, text="Delete", command=delete_recipe)
     btt_Delete.pack(pady=5)
 
-    btE = ttk.Button(displayWindow, text="EXPORT",
-                     command=lambda: makeExport(recipe_id, recipe_name, ingredients, directions))
+    btE = ttk.Button(displayWindow, text="EXPORT",command=lambda: makeExport(recipe_id, recipe_name, ingredients, directions))
     btE.place(x=0, y=1)
     displayWindow.protocol("WM_DELETE_WINDOW", on_closing_display_window)
 
@@ -262,6 +257,7 @@ def update_recipe_list(recipes=None):
 
 def change():
     for window in [win, newWindow, editWindow, displayWindow, menuWindow]:
+
         if window:
             window.configure(background=b)
             for widget in window.winfo_children():
@@ -344,17 +340,14 @@ def openImport():
 
                     directions = "\n".join(lines[directions_start:]).strip()
 
-                    cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
-                                   (name, ingredients, directions))
+                    cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",(name, ingredients, directions))
                     connection.commit()
                     messagebox.showinfo("Success", f"Recipe '{name}' has been imported successfully.")
                     on_closing_new_window()
                 except ValueError:
-                    messagebox.showerror("Error",
-                                         "Invalid file format. Ensure the file contains 'Ingredients:' and 'Directions:' sections.")
+                    messagebox.showerror("Error","Invalid file format. Ensure the file contains 'Ingredients:' and 'Directions:' sections.")
             else:
-                messagebox.showerror("Error",
-                                     "Invalid file format. Ensure the file contains at least Name, Ingredients, and Directions.")
+                messagebox.showerror("Error","Invalid file format. Ensure the file contains at least Name, Ingredients, and Directions.")
         else:
             messagebox.showerror("Error", f"File '{filename}' not found.")
     else:
@@ -366,6 +359,7 @@ def openImport():
 def openMenuWindow():
     global menuWindow
     global labelColor
+
     if menuWindow is not None:
         menuWindow.focus()
         return
@@ -389,10 +383,25 @@ def openMenuWindow():
 def add_navigation_buttons():
     global current_page
     global search_var
-    search_query = search_var.get().lower()
 
+    # Clear the old bubbles (if any)
     for widget in frame_navigation.winfo_children():
         widget.destroy()
+
+    # Get total pages
+    cursor.execute("SELECT COUNT(*) FROM recipes")
+    total_recipes = cursor.fetchone()[0]
+    total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
+
+    for page in range(total_pages):
+        bubble = Button(frame_navigation, text=str(page + 1), width=4, height=2, bg=f, fg=b, font=("Bold", 12),relief=SOLID, command=lambda p=page: go_to_page(p))
+
+        if page == current_page:
+            bubble.config(bg=b, fg=f)
+        else:
+            pass
+
+        bubble.grid(row=0, column=page, padx=5, pady=5)
 
     if current_page > 0:
         win.prev_button = Button(win, text="Prev", height=8, width=16, bg=f, fg=b, activebackground="blue",command=previous_page)
@@ -402,27 +411,20 @@ def add_navigation_buttons():
         if hasattr(win, 'prev_button'):
             win.prev_button["state"] = "disabled"
 
-    cursor.execute("SELECT COUNT(*) FROM recipes")
-    total_recipes = cursor.fetchone()[0]
-    total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
     if current_page < total_pages - 1:
-        win.next_button = Button(win, text="Next", height=8, width=16, bg=f, fg=b, activebackground="blue",command=next_page)
-        win.next_button.place(x=1140,y=550)
-
+        win.next_button = Button(win, text="Next", height=8, width=16, bg=f, fg=b, activebackground="blue",
+                                 command=next_page)
+        win.next_button.place(x=1140, y=550)
         win.next_button["state"] = "normal"
-
     else:
         if hasattr(win, 'next_button'):
             win.next_button["state"] = "disabled"
-    if search_query:
-        try:
-            cursor.execute("SELECT COUNT(*) FROM recipes WHERE name LIKE ?", ('%' + search_query + '%',))
-            win.next_button["state"] = "disabled"
-            win.prev_button["state"] = "disabled"
-        except Exception as e:
-            print(e)
-    else:
-        cursor.execute("SELECT COUNT(*) FROM recipes")
+
+
+def go_to_page(page):
+    global current_page
+    current_page = page
+    update_recipe_list()
 
 
 def previous_page(event=None):
@@ -477,8 +479,7 @@ def drop_table():
 
 def test():
     for x in range(25):
-        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",
-                       (x, x, x))
+        cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",(x, x, x))
         connection.commit()
         update_recipe_list()
 
@@ -489,6 +490,7 @@ def setColor(b_color, f_color):
     f = f_color
     saveColor(b, f)
     change()
+    add_navigation_buttons()
 
 
 b, f = loadColor()

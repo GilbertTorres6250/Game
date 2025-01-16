@@ -1,3 +1,4 @@
+from tkinter import filedialog
 from tkinter import *
 from tkinter import ttk
 import sqlite3
@@ -110,22 +111,21 @@ def openNewWindow():
     newWindow.geometry("400x400")
     newWindow.configure(background=b)
 
-    Label(newWindow, text="NEW RECIPE", background=b, foreground=f, font="impact").pack()
-
     lbl_newName = ttk.Label(newWindow, text="Name:", background=b, foreground=f, font="impact")
-    lbl_newName.place(relx=0.25, rely=0.1, anchor=CENTER)
-    ent_newName = ttk.Entry(newWindow)
+    lbl_newName.place(relx=0.25, rely=0.04, anchor=CENTER)
+    ent_newName = Entry(newWindow,relief=RIDGE, bd=5)
     ent_newName.pack(pady=5)
+    ent_newName.exclude_change = True
 
     Label(newWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
-    ent_ingredients = Text(newWindow, width=30, height=5)
+    ent_ingredients = Text(newWindow, width=30, height=5,relief=RIDGE, bd=10,)
     ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
     Label(newWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
-    ent_directions = Text(newWindow, width=30, height=5)
-    ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
+    ent_directions = Text(newWindow, width=30, height=5,relief=RIDGE, bd=10,)
+    ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True,)
     newWindow.protocol("WM_DELETE_WINDOW", on_closing_new_window)
 
     def add_recipe():
@@ -137,10 +137,11 @@ def openNewWindow():
         on_closing_new_window()
         update_recipe_list()
 
-    btt_Add = ttk.Button(newWindow, text="Add", command=add_recipe)
+    btt_Add = Button(newWindow, text="Add", command=add_recipe, width=10, relief=RAISED, bd=5, bg=f, fg=b)
     btt_Add.pack(pady=5)
-    btI = ttk.Button(newWindow, text="IMPORT", command=openImport)
+    btI = Button(newWindow, text="IMPORT", command=openImport, width=10, relief=RAISED, bd=5, bg=f, fg=b)
     btI.pack(pady=5)
+    newWindow.minsize(width=400,height=400)
 
 
 def display_recipe(recipe_id, recipe_name, ingredients, directions):
@@ -156,23 +157,22 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
         editWindow.geometry("400x400")
         editWindow.configure(background=b)
 
-        Label(editWindow, text="Edit Recipe", background=b, foreground=f, font="impact").pack()
-
         lbl_name = ttk.Label(editWindow, text="Name:", background=b, foreground=f, font="impact")
-        lbl_name.place(relx=0.25, rely=0.1, anchor=CENTER)
-        ent_name = ttk.Entry(editWindow)
+        lbl_name.place(relx=0.25, rely=0.04, anchor=CENTER)
+        ent_name = Entry(editWindow,relief=RIDGE, bd=5)
         ent_name.insert(END, recipe_name)
+        ent_name.exclude_change = True
         ent_name.pack(pady=5)
 
         Label(editWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
-        ent_ingredients = Text(editWindow, width=30, height=5)
+        ent_ingredients = Text(editWindow, width=30, height=5,relief=RIDGE, bd=10,)
         ent_ingredients.insert(END, ingredients)
         ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
         Label(editWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
-        ent_directions = Text(editWindow, width=30, height=5)
+        ent_directions = Text(editWindow, width=30, height=5,relief=RIDGE, bd=10,)
         ent_directions.insert(END, directions)
         ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
         editWindow.protocol("WM_DELETE_WINDOW", on_closing_edit_window)
@@ -188,8 +188,9 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
             on_closing_edit_window()
             update_recipe_list()
 
-        btt_Save = ttk.Button(editWindow, text="Save", command=save_changes)
+        btt_Save = Button(editWindow, text="Save", command=save_changes, width=10, relief=RAISED, bd=5, bg=f, fg=b)
         btt_Save.pack(pady=5)
+        editWindow.minsize(width=400, height=400)
 
     def delete_recipe():
         cursor.execute("DELETE FROM recipes WHERE id=?", (recipe_id,))
@@ -209,27 +210,29 @@ def display_recipe(recipe_id, recipe_name, ingredients, directions):
 
     Label(displayWindow, text="Ingredients:", background=b, foreground=f, font="bold").pack()
 
-    ent_ingredients = Text(displayWindow, width=30, height=5)
+    ent_ingredients = Text(displayWindow, width=30, height=5,relief=RIDGE, bd=10,)
     ent_ingredients.insert(END, ingredients)
     ent_ingredients.config(state='disabled')
     ent_ingredients.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
     Label(displayWindow, text="Directions:", background=b, foreground=f, font="bold").pack()
 
-    ent_directions = Text(displayWindow, width=30, height=5)
+    ent_directions = Text(displayWindow, width=30, height=5,relief=RIDGE, bd=10,)
     ent_directions.insert(END, directions)
     ent_directions.config(state='disabled')
     ent_directions.pack(pady=5, padx=10, fill=BOTH, expand=True)
 
-    btt_Edit = ttk.Button(displayWindow, text="Edit", command=edit_recipe)
+    btt_Edit = Button(displayWindow, text="Edit", command=edit_recipe, width=10, relief=RAISED, bd=5, bg=f, fg=b)
     btt_Edit.pack(pady=5)
 
-    btt_Delete = ttk.Button(displayWindow, text="Delete", command=delete_recipe)
+    btt_Delete = Button(displayWindow, text="Delete", command=delete_recipe, width=10, relief=RAISED, bd=5, bg=f, fg=b)
     btt_Delete.pack(pady=5)
 
-    btE = ttk.Button(displayWindow, text="EXPORT",command=lambda: makeExport(recipe_id, recipe_name, ingredients, directions))
+    btE = Button(displayWindow, text="EXPORT",command=lambda: makeExport(recipe_id, recipe_name, ingredients, directions), width=10, relief=RAISED, bd=5, bg=f, fg=b)
     btE.place(x=0, y=1)
+    displayWindow.protocol()
     displayWindow.protocol("WM_DELETE_WINDOW", on_closing_display_window)
+    displayWindow.minsize(width=400,height=400)
 
 
 def update_recipe_list(recipes=None):
@@ -245,7 +248,7 @@ def update_recipe_list(recipes=None):
 
     for recipe in recipes:
         recipe_id, recipe_name, _, _ = recipe
-        recipe_button = Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe),width=30, padx=20,pady= 20,font=20)
+        recipe_button = Button(frame, text=recipe_name, command=lambda recipe=recipe: display_recipe(*recipe),width=30, padx=20,pady= 20,font=20,relief=RIDGE, bd=5)
 
         recipe_button.grid(row=row_count, column=column_count, padx=10, pady=10,)
         column_count += 1
@@ -261,18 +264,19 @@ def change():
         if window:
             window.configure(background=b)
             for widget in window.winfo_children():
-                if 'background' in widget.keys():
-                    widget.configure(background=b)
-                if 'foreground' in widget.keys():
-                    widget.configure(foreground=f)
-                if isinstance(widget, Text):
-                    widget.configure(foreground="black")
-                    widget.configure(background="white")
-                if isinstance(widget, Button):
-                    widget.configure(background=f)
-                    widget.configure(foreground=b)
-                if isinstance(widget, Entry):
-                    widget.configure(foreground=b)
+                if hasattr(widget, 'exclude_change') and widget.exclude_change:
+                    pass
+                else:
+                    if 'background' in widget.keys():
+                        widget.configure(background=b)
+                    if 'foreground' in widget.keys():
+                        widget.configure(foreground=f)
+                    if isinstance(widget, Text):
+                        widget.configure(foreground="black", background="white")
+                    if isinstance(widget, Button):
+                        widget.configure(background=f,foreground=b, activebackground=b, activeforeground=f)
+                    if isinstance(widget, Entry):
+                        widget.configure(foreground=b, background=f)
 
 
 color_map = {
@@ -304,7 +308,9 @@ color_map = {
 
 
 def create_button(name, color_pair):
-    return ttk.Button(menuWindow, text=name, command=lambda: setColor(*color_pair))
+    background_color, text_color = color_pair
+    return Button(menuWindow,bg=background_color,fg=text_color, text=name, command=lambda: setColor(*color_pair),width=15,relief=RAISED,bd=5)
+
 
 
 def makeExport(recipe_id, recipe_name, ingredients, directions):
@@ -319,9 +325,10 @@ def makeExport(recipe_id, recipe_name, ingredients, directions):
 
 
 def openImport():
-    filename = askstring("Import Recipe", "Enter the recipe file name (without extension):")
+    filename = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+    #filename = askstring("Import Recipe", "Enter the recipe file name (without extension):")
     if filename:
-        filename = filename.strip() + '.txt'
+        #filename = filename.strip() + '.txt'
 
         if os.path.exists(filename):
             with open(filename, 'r') as file:
@@ -342,7 +349,7 @@ def openImport():
 
                     cursor.execute("INSERT INTO recipes (name, ingredients, directions) VALUES (?, ?, ?)",(name, ingredients, directions))
                     connection.commit()
-                    messagebox.showinfo("Success", f"Recipe '{name}' has been imported successfully.")
+                    #messagebox.showinfo("Success", f"Recipe '{name}' has been imported successfully.")
                     on_closing_new_window()
                 except ValueError:
                     messagebox.showerror("Error","Invalid file format. Ensure the file contains 'Ingredients:' and 'Directions:' sections.")
@@ -377,24 +384,24 @@ def openMenuWindow():
         row = 1 + (i // 3)
         col = i % 3
         button = create_button(name, color_pair)
-        button.grid(row=row, column=col, padx=20, pady=10)
+        button.exclude_change = True
+
+        button.grid(row=row, column=col, padx=(3,2), pady=10)
 
 
 def add_navigation_buttons():
     global current_page
     global search_var
 
-    # Clear the old bubbles (if any)
     for widget in frame_navigation.winfo_children():
         widget.destroy()
 
-    # Get total pages
     cursor.execute("SELECT COUNT(*) FROM recipes")
     total_recipes = cursor.fetchone()[0]
     total_pages = (total_recipes + recipes_per_page - 1) // recipes_per_page
 
     for page in range(total_pages):
-        bubble = Button(frame_navigation, text=str(page + 1), width=4, height=2, bg=f, fg=b, font=("Bold", 12),relief=SOLID, command=lambda p=page: go_to_page(p))
+        bubble = Button(frame_navigation, text=str(page + 1), width=2, height=1, bg=f, fg=b, activebackground=b,activeforeground=f,relief=RIDGE, bd=5, font="Bold", command=lambda p=page: go_to_page(p))
 
         if page == current_page:
             bubble.config(bg=b, fg=f)
@@ -404,7 +411,7 @@ def add_navigation_buttons():
         bubble.grid(row=0, column=page, padx=5, pady=5)
 
     if current_page > 0:
-        win.prev_button = Button(win, text="Prev", height=8, width=16, bg=f, fg=b, activebackground="blue",command=previous_page)
+        win.prev_button = Button(win, text="Prev",font="bold", height=5, width=10, bg=f, fg=b, activebackground=b,activeforeground=f,relief=RAISED, bd=5,command=previous_page)
         win.prev_button.place(x=20, y=550)
         win.prev_button["state"] = "normal"
     elif current_page == 0:
@@ -412,8 +419,7 @@ def add_navigation_buttons():
             win.prev_button["state"] = "disabled"
 
     if current_page < total_pages - 1:
-        win.next_button = Button(win, text="Next", height=8, width=16, bg=f, fg=b, activebackground="blue",
-                                 command=next_page)
+        win.next_button = Button(win, text="Next",font="bold", height=5, width=10, bg=f, fg=b,activebackground=b,activeforeground=f,relief=RAISED, bd=5, command=next_page)
         win.next_button.place(x=1140, y=550)
         win.next_button["state"] = "normal"
     else:
@@ -423,8 +429,10 @@ def add_navigation_buttons():
 
 def go_to_page(page):
     global current_page
-    current_page = page
-    update_recipe_list()
+    if win.focus_get() != ent_Search:
+        if not search_var.get():
+            current_page = page
+            update_recipe_list()
 
 
 def previous_page(event=None):
@@ -508,20 +516,20 @@ update_recipe_list()
 labelMain = Label(win, text="COOK BOOK", foreground=f, background=b, font=("impact", 40))
 labelMain.place(x=500, y=10)
 
-ent_Search = ttk.Entry(win, textvariable=search_var, font=("bold",25), foreground=b,width=18)
-ent_Search.place(x=800, y=25)
+ent_Search = Entry(win, textvariable=search_var, font=("bold",30), foreground=b, background=f,width=20,relief=RIDGE, bd=10)
+ent_Search.place(x=800, y=15)
 ent_Search.bind("<KeyRelease>", lambda event: search_recipes())
 
-bt1 = Button(win, text="+", height=4, width=8, bg=f, fg=b, activebackground="blue", command=openNewWindow)
+bt1 = Button(win, text="NEW", height=4, width=8, bg=f, fg=b, activebackground=b,activeforeground=f, command=openNewWindow,relief=RAISED, bd=5)
 bt1.place(x=0, y=1)
-btP = Button(win, text="PRNT", height=4, width=8, bg=f, fg=b, activebackground="blue", command=print_database)
-btP.place(x=70, y=1)
-btK = Button(win, text="KILL", height=4, width=8, bg=f, fg=b, activebackground="blue", command=drop_table)
-btK.place(x=140, y=1)
-btA = Button(win, text="ADD", height=4, width=8, bg=f, fg=b, activebackground="blue", command=test)
-btA.place(x=210, y=1)
-btM = Button(win, text="MENU", height=4, width=8, bg=f, fg=b, activebackground="blue", command=openMenuWindow)
-btM.place(x=280, y=1)
+btP = Button(win, text="PRNT", height=4, width=8, bg=f, fg=b, activebackground=b,activeforeground=f, command=print_database,relief=RAISED, bd=5)
+btP.place(x=75, y=1)
+btK = Button(win, text="KILL", height=4, width=8, bg=f, fg=b, activebackground=b,activeforeground=f, command=drop_table,relief=RAISED, bd=5)
+btK.place(x=150, y=1)
+btA = Button(win, text="ADD", height=4, width=8, bg=f, fg=b, activebackground=b,activeforeground=f, command=test,relief=RAISED, bd=5)
+btA.place(x=225, y=1)
+btM = Button(win, text="MENU", height=4, width=8, bg=f, fg=b, activebackground=b,activeforeground=f, command=openMenuWindow,relief=RAISED, bd=5)
+btM.place(x=300, y=1)
 win.bind("<Right>", next_page)
 win.bind("<Left>", previous_page)
 win.bind_all("<Button-1>", lambda event: event.widget.focus_set())
